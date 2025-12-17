@@ -1,0 +1,26 @@
+import React from "react";
+function Pagination({ currentPage }) {
+  return (
+    <nav className="mt-4">
+      <ul className="pagination justify-content-center">
+        <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+          <button className="page-link">Previous</button>
+        </li>
+        <li className={`page-item ${currentPage === 1 ? "active" : ""}`}>
+          <button className="page-link">1</button>
+        </li>
+        <li className={`page-item ${currentPage === 2 ? "active" : ""}`}>
+          <button className="page-link">2</button>
+        </li>
+        <li className={`page-item ${currentPage === 3 ? "active" : ""}`}>
+          <button className="page-link">3</button>
+        </li>
+        <li className="page-item">
+          <button className="page-link">Next</button>
+        </li>
+      </ul>
+    </nav>
+  );
+}
+
+export default Pagination;
