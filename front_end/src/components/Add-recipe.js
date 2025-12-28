@@ -1,6 +1,65 @@
-import React from "react";
+import React, { useState } from "react";
+import axios from "axios";
 
 function AddRecipeModal() {
+  const [title, setTitle] = useState("");
+  const [ingredients, setIngredients] = useState("");
+  const [steps, setSteps] = useState("");
+  const [time, setTime] = useState("");
+  const [difficulty, setDifficulty] = useState("");
+  const [image, setImage] = useState(null);
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      setMessage("You must be logged in");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("ingredients", ingredients);
+    formData.append("steps", steps);
+    formData.append("time", time);
+    formData.append("difficulty", difficulty);
+    if (image) formData.append("image", image);
+
+    try {
+      setLoading(true);
+
+      await axios.post(
+        "http://localhost:8000/api/add_recipe/",
+        formData,
+        {
+          headers: {
+           Authorization: `Token ${token}` ,
+          "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      setMessage("Recipe added successfully!");
+
+   
+      setTitle("");
+      setIngredients("");
+      setSteps("");
+      setTime("");
+      setDifficulty("");
+      setImage(null);
+
+    } catch (error) {
+      console.error(error);
+      setMessage("Failed to add recipe");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div
       className="modal fade"
@@ -55,7 +114,10 @@ function AddRecipeModal() {
       </style>
 
       <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-        <div className="modal-content border-0 rounded-4 shadow-lg">
+        <form
+          className="modal-content border-0 rounded-4 shadow-lg"
+          onSubmit={handleSubmit}
+        >
           <div className="modal-header modal-header-premium rounded-top-4 d-flex justify-content-between align-items-center">
             <div>
               <h4 className="fw-bold mb-0">🍽 Create New Recipe</h4>
@@ -73,13 +135,22 @@ function AddRecipeModal() {
           </div>
 
           <div className="modal-body bg-light p-4">
+            {message && (
+              <div className="alert alert-info text-center">{message}</div>
+            )}
+
             <div className="section-card mb-4">
-              <h6 className="fw-bold mb-3 text-primary">📌 Basic Information</h6>
+              <h6 className="fw-bold mb-3 text-primary">
+                Basic Information
+              </h6>
 
               <input
                 type="text"
                 className="form-control form-control-lg input-box mb-3"
                 placeholder="Recipe Name"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
               />
 
               <div className="row g-3">
@@ -88,11 +159,18 @@ function AddRecipeModal() {
                     type="text"
                     className="form-control input-box"
                     placeholder="⏱ Cooking Time (e.g. 45 mins)"
+                    value={time}
+                    onChange={(e) => setTime(e.target.value)}
                   />
                 </div>
                 <div className="col-md-6">
-                  <select className="form-select input-box">
-                    <option>🔥 Difficulty Level</option>
+                  <select
+                    className="form-select input-box"
+                    value={difficulty}
+                    onChange={(e) => setDifficulty(e.target.value)}
+                    required
+                  >
+                    <option value=""> Difficulty Level</option>
                     <option>Easy</option>
                     <option>Medium</option>
                     <option>Hard</option>
@@ -101,48 +179,56 @@ function AddRecipeModal() {
               </div>
             </div>
 
-
             <div className="section-card mb-4">
-                  <h6 className="fw-bold mb-3 text-success">📖 Recipe Details</h6>
+              <h6 className="fw-bold mb-3 text-success">
+                 Recipe Details
+              </h6>
 
-                  <div className="row g-3">
-                    <div className="col-md-6">
-                      <textarea
-                        className="form-control input-box"
-                        style={{ height: "160px" }}
-                        placeholder="🧂 Ingredients (one per line)"
-                      />
-                    </div>
+              <div className="row g-3">
+                <div className="col-md-6">
+                  <textarea
+                    className="form-control input-box"
+                    style={{ height: "160px" }}
+                    placeholder=" Ingredients (one per line)"
+                    value={ingredients}
+                    onChange={(e) => setIngredients(e.target.value)}
+                  />
+                </div>
 
-                    <div className="col-md-6">
-                      <textarea
-                        className="form-control input-box"
-                        style={{ height: "160px" }}
-                        placeholder="📋 Cooking Steps"
-                      />
-                    </div>
-                  </div>
+                <div className="col-md-6">
+                  <textarea
+                    className="form-control input-box"
+                    style={{ height: "160px" }}
+                    placeholder=" Cooking Steps"
+                    value={steps}
+                    onChange={(e) => setSteps(e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="section-card">
-                  <h6 className="fw-bold mb-3 text-warning">📸 Recipe Image</h6>
+              <h6 className="fw-bold mb-3 text-warning">
+                Recipe Image
+              </h6>
 
-                  <div className="upload-zone">
-                    <p className="fw-semibold mb-1">
-                      Upload Image here 
-                    </p>
-                    <small className="text-muted d-block mb-3">
-                      (JPG OR PNG) Only 
-                    </small>
-                    <input
-                      type="file"
-                      className="form-control"
-                      accept="image/*"
-                    />
-                  </div>
+              <div className="upload-zone">
+                <p className="fw-semibold mb-1">
+                  Upload Image here
+                </p>
+                <small className="text-muted d-block mb-3">
+                  (JPG OR PNG) Only
+                </small>
+                <input
+                  type="file"
+                  className="form-control"
+                  accept="image/*"
+                  onChange={(e) => setImage(e.target.files[0])}
+                />
+              </div>
             </div>
-
           </div>
+
           <div className="modal-footer modal-footer-premium px-4 py-3">
             <button
               type="button"
@@ -155,12 +241,12 @@ function AddRecipeModal() {
             <button
               type="submit"
               className="btn btn-primary rounded-pill px-4 fw-bold shadow-sm"
+              disabled={loading}
             >
-              🚀 Publish Recipe
+              {loading ? "Publishing..." : "🚀 Publish Recipe"}
             </button>
           </div>
-
-        </div>
+        </form>
       </div>
     </div>
   );

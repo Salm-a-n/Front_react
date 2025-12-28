@@ -1,11 +1,12 @@
+
 import Navbar from './components/Navbar';
 import Footer from './components/footer';
+import { Link } from "react-router-dom";
 
 function App() {
   return (
     <div className="d-flex flex-column min-vh-100">
       <Navbar />
-
 
       <div className="position-relative flex-grow-1 d-flex flex-column">
         <img
@@ -19,16 +20,16 @@ function App() {
             className="col-lg-10 px-4 py-5 rounded"
             style={{
               backgroundColor: "rgba(0, 0, 0, 0.4)",
-              backdropFilter: "blur(5px)",           
-              WebkitBackdropFilter: "blur(10px)",  
+              backdropFilter: "blur(5px)",
+              WebkitBackdropFilter: "blur(10px)",
               color: "white"
             }}
           >
-            <h1 className="fw-bold display-5 mb-4 ">
+            <h1 className="fw-bold display-5 mb-4">
               Welcome to Recipe Sharing Platform
             </h1>
 
-            <p className="lead fw-bold fs-3 text-justify">
+            <p className="lead fw-bold fs-3 text-justify mb-4">
               The recipe sharing platform allows users to explore a wide variety of recipes uploaded by the community. 
               All uploaded recipes are displayed in a clear list, and when a user clicks on a recipe, they can view its 
               full details including ingredients, preparation steps, difficulty level, cooking time, and the number of 
@@ -37,6 +38,13 @@ function App() {
               be quickly found by name, ensuring that both creators and food enthusiasts can easily share, browse, and 
               enjoy culinary ideas together.
             </p>
+
+            <Link
+              to="/register"
+              className="btn btn-lg btn-success fw-bold rounded-pill px-5 shadow"
+            >
+               Register Now
+            </Link>
           </div>
         </div>
       </div>

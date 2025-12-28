@@ -1,6 +1,46 @@
-import React from "react";
+import axios from "axios";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Register = () => {
+    var [name, setName] = useState('');
+    var [email, setEmail] = useState('');
+    var [password, setPassword] = useState('');
+    var [passwordConf, setPasswordConf] = useState('');
+    var [errorMessage, setErrorMessage] = useState('');
+    var navigate = useNavigate();
+    function registerUser(){
+      if (!name || !email || !password || !passwordConf) {
+            setErrorMessage("All fields are required");
+            return;
+        }
+
+      if (password !== passwordConf) {
+            setErrorMessage("Passwords do not match");
+            return;
+        }
+        var user = {
+            name: name,
+            email: email,
+            password: password,
+        }
+         axios.post('http://localhost:8000/signup/', user)
+    .then(response => {
+      if (response.data.message === "user created successsfully") {
+        setErrorMessage('');
+        navigate('/login');
+      } else {
+        setErrorMessage(response.data.message);
+      }
+    })
+    .catch(error => {
+      if (error.response && error.response.data.message) {
+        setErrorMessage(error.response.data.message);
+      } else {
+        setErrorMessage('Failed to connect to API');
+      }
+    });
+    }
   return (
     <div
       style={{
@@ -8,7 +48,7 @@ const Register = () => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        background: "linear-gradient(135deg, #6a11cb, #2575fc)",
+        background: "linear-gradient(135deg, #17e239ff, #25c6fcff)",
         padding: "20px",
       }}
     >
@@ -18,17 +58,18 @@ const Register = () => {
           width: "100%",
           maxWidth: "450px",
           borderRadius: "20px",
-          backgroundColor: "rgba(255, 255, 255, 0.95)",
+          background: "linear-gradient(135deg, #375b6aff, #e0ebe1ff)",
           boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
         }}
       >
         <h2
           className="text-center mb-4 fw-bold"
-          style={{ color: "#343a40" }}
+          style={{ color: "#dee2e6ff" }}
         >
           Create Account
         </h2>
-        <form>
+        {errorMessage?<div className="alert alert-danger">{errorMessage}</div>:''}
+        <form onSubmit={(e) => { e.preventDefault(); registerUser(); }}>
           <div className="mb-3">
             <input
               type="text"
@@ -51,6 +92,8 @@ const Register = () => {
                 (e.target.style.boxShadow =
                   "inset 0 2px 5px rgba(0,0,0,0.05)")
               }
+              value={name}
+              onInput={(event)=>setName(event.target.value)}
             />
           </div>
 
@@ -77,6 +120,8 @@ const Register = () => {
                 (e.target.style.boxShadow =
                   "inset 0 2px 5px rgba(0,0,0,0.05)")
               }
+              value={email}
+              onInput={(event)=>setEmail(event.target.value)}
             />
           </div>
 
@@ -102,6 +147,8 @@ const Register = () => {
                 (e.target.style.boxShadow =
                   "inset 0 2px 5px rgba(0,0,0,0.05)")
               }
+              value={password}
+              onInput={(event)=>setPassword(event.target.value)}
             />
           </div>
 
@@ -127,6 +174,8 @@ const Register = () => {
                 (e.target.style.boxShadow =
                   "inset 0 2px 5px rgba(0,0,0,0.05)")
               }
+              value={passwordConf}
+              onInput={(event)=>setPasswordConf(event.target.value)}
             />
           </div>
 
@@ -151,12 +200,12 @@ const Register = () => {
               e.target.style.transform = "scale(1)";
               e.target.style.boxShadow = "0 5px 15px rgba(0,0,0,0.2)";
             }}
-          >
+            >
             Register
           </button>
         </form>
 
-        <p className="text-center mt-3" style={{ fontSize: "0.9rem" }}>
+        <p className="text-center mt-3" style={{ fontSize: "0.9rem", color: "#fff"}}>
           Already have an account?{" "}
           <a href="/login" style={{ color: "#2575fc", fontWeight: "500" }}>
             Login

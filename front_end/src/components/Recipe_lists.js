@@ -4,55 +4,89 @@ import SearchBox from "./Searchbox";
 import Pagination from "./Pagination";
 import AddRecipeModal from "./Add-recipe";
 import ViewRecipeModal from "./viewRecipeModal";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 function RecipeList() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const successMessage = location.state?.successMessage;
 
-  const myRecipes = [
-    {
-      name: "Creamy Pasta",
-      date: "2025-12-01",
-      views: 245,
-      image:
-        "https://media.istockphoto.com/id/1225004589/photo/pasta-with-cream-sauce.jpg",
-    },
-    {
-      name: "Chicken Biryani",
-      date: "2025-12-05",
-      views: 520,
-      image:
-        "https://i.pinimg.com/474x/81/6d/4e/816d4e036f2ffcf1ea334577f4a29659.jpg",
-    },
-    {
-      name: "Chocolate Cake",
-      date: "2025-12-10",
-      views: 390,
-      image:
-        "https://images.unsplash.com/photo-1546069901-ba9599a7e63c",
-    },
-    {
-      name: "Avocado Toast",
-      date: "2025-12-12",
-      views: 180,
-      image:
-        "https://images.squarespace-cdn.com/content/v1/5e8e046b33bab14de3b30150/1588040769856-GG1JZH7OWWN33X6K0K20/IMG_6029.jpg",
-    },
-    {
-      name: "Grilled Salmon",
-      date: "2025-12-14",
-      views: 275,
-      image:
-        "https://images.unsplash.com/photo-1604908177522-432c5f3a6f6a",
-    },
-    {
-      name: "Veggie Pizza",
-      date: "2025-12-15",
-      views: 610,
-      image:
-        "https://images.unsplash.com/photo-1601924582971-6f3c6e2a2a7f",
-    },
-  ];
+  const [showToast, setShowToast] = useState(false);
+  const [recipes, setRecipes] = useState([]);
+  const [allRecipes, setAllRecipes] = useState([]); // full dataset
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [searching, setSearching] = useState(false);
+  const [selectedRecipeId, setSelectedRecipeId] = useState(null);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const recipesPerPage = 3;
+
+  useEffect(() => {
+    if (successMessage) {
+      setShowToast(true);
+      const timer = setTimeout(() => setShowToast(false), 2000);
+      window.history.replaceState({}, document.title);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
+
+  // Load all recipes
+  useEffect(() => {
+    axios
+      .get("http://127.0.0.1:8000/api/full_recipes/")
+      .then((response) => {
+        setRecipes(response.data.recipes);
+        setAllRecipes(response.data.recipes);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setError("Failed to load recipes");
+        setLoading(false);
+      });
+  }, []);
+
+  // Search handler
+  const handleSearch = (query) => {
+    setCurrentPage(1); // reset page
+
+    if (!query.trim()) {
+      setRecipes(allRecipes);
+      return;
+    }
+
+    setSearching(true);
+
+    axios
+      .get("http://127.0.0.1:8000/api/search_recipes_public/", {
+        params: { title: query },
+      })
+      .then((res) => {
+        setRecipes(res.data.recipes);
+        setSearching(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setRecipes([]);
+        setSearching(false);
+      });
+  };
+
+  // Pagination logic
+  const indexOfLastRecipe = currentPage * recipesPerPage;
+  const indexOfFirstRecipe = indexOfLastRecipe - recipesPerPage;
+  const currentRecipes = recipes.slice(indexOfFirstRecipe, indexOfLastRecipe);
+  const totalPages = Math.ceil(recipes.length / recipesPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    if (pageNumber < 1 || pageNumber > totalPages) return;
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <div className="d-flex flex-column min-vh-100 bg-light">
@@ -80,14 +114,39 @@ function RecipeList() {
             border-radius: 20px;
             font-weight: 600;
           }
+          .login-toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            min-width: 320px;
+            padding: 14px 22px;
+            background: linear-gradient(135deg, #28a745, #218838);
+            color: #fff;
+            font-weight: 600;
+            border-radius: 12px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+            animation: slideFade 0.4s ease;
+          }
+          @keyframes slideFade {
+            from {
+              opacity: 0;
+              transform: translate(-50%, -15px);
+            }
+            to {
+              opacity: 1;
+              transform: translate(-50%, 0);
+            }
+          }
         `}
       </style>
 
       <Navbar />
 
+      {showToast && <div className="login-toast">✅ Login successfully</div>}
+
       <div className="container-fluid flex-grow-1 py-5">
-
-
         <div className="d-flex justify-content-between align-items-center mb-5">
           <h2 className="fw-bold mb-0">
             📖 <span className="text-success">Recipes</span>
@@ -111,52 +170,69 @@ function RecipeList() {
           </div>
         </div>
 
+        <SearchBox placeholder="🔍 Search recipes..." onSearch={handleSearch} />
 
-        <SearchBox placeholder="🔍 Search recipes..." />
         <h5 className="fw-bold text-secondary mb-4">🍽 Explore Recipes</h5>
 
-    
+        {loading && (
+          <div className="text-center py-5 fw-semibold">Loading recipes...</div>
+        )}
+        {error && (
+          <div className="alert alert-danger text-center">{error}</div>
+        )}
+        {searching && (
+          <div className="text-center py-3 text-muted">Searching recipes...</div>
+        )}
+        {!loading && !searching && recipes.length === 0 && (
+          <div className="text-center py-5 fw-semibold text-muted">
+            😕 No recipes found
+          </div>
+        )}
+
         <div className="row g-4">
-          {myRecipes.map((recipe, index) => (
-            <div className="col-md-4" key={index}>
+          {currentRecipes.map((recipe) => (
+            <div className="col-md-4" key={recipe.id}>
               <div className="card recipe-card h-100 border-0 rounded-4 overflow-hidden position-relative">
                 <span className="views-badge">👁 {recipe.views}</span>
 
                 <img
-                  src={recipe.image}
-                  alt={recipe.name}
+                  src={recipe.image ? recipe.image : "/no-image.png"}
+                  alt={recipe.title}
                   className="recipe-img w-100"
                 />
 
                 <div className="card-body text-center">
-                  <h5 className="fw-bold mb-2">{recipe.name}</h5>
-                  <p className="text-muted small mb-3">
-                    📅 {recipe.date}
-                  </p>
+                  <h5 className="fw-bold mb-1">{recipe.title}</h5>
+                  <p className="text-muted small mb-1">👨‍🍳 {recipe.shef}</p>
+                  <p className="text-muted small mb-3">⏱ {recipe.time} mins</p>
 
                   <button
                     className="btn btn-outline-success w-100 rounded-pill fw-semibold"
                     data-toggle="modal"
                     data-target="#viewRecipeModal"
-                    >
+                    onClick={() => setSelectedRecipeId(recipe.id)}
+                  >
                     👀 View Recipe
                   </button>
-
                 </div>
               </div>
             </div>
           ))}
         </div>
 
- 
+        {/* Pagination */}
         <div className="mt-5 d-flex justify-content-center">
-          <Pagination currentPage={1} />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
         </div>
       </div>
 
       <Footer />
       <AddRecipeModal />
-      <ViewRecipeModal />
+      <ViewRecipeModal recipeId={selectedRecipeId} />
     </div>
   );
 }

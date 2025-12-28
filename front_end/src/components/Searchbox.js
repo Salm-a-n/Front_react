@@ -1,12 +1,25 @@
-import React from "react";
+import React, { useState } from "react";
 
-function SearchBox({ placeholder }) {
+function SearchBox({ placeholder, onSearch }) {
+  const [query, setQuery] = useState("");
+
+  const handleChange = (e) => {
+    const value = e.target.value;
+    setQuery(value);
+
+    if (onSearch) {
+      onSearch(value);
+    }
+  };
+
   return (
     <div className="mb-3 position-relative">
       <input
         type="text"
         className="form-control form-control-lg ps-5 rounded-pill shadow-sm border-0"
         placeholder={placeholder}
+        value={query}
+        onChange={handleChange}
         style={{
           backgroundColor: "#f8f9fa",
           transition: "all 0.3s ease",
@@ -17,8 +30,7 @@ function SearchBox({ placeholder }) {
       <span
         className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"
         style={{ pointerEvents: "none" }}
-      >
-      </span>
+      ></span>
     </div>
   );
 }

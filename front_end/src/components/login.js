@@ -1,10 +1,50 @@
-import React from "react";
+import axios from "axios";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+
+  const navigate = useNavigate();
+
+  async function attemptLogin(e) {
+    e.preventDefault();
+
+    try {
+      const response = await axios.post("http://localhost:8000/api/login/", {
+        email,
+        password,
+      });
+
+      setErrorMessage('');
+      setSuccessMessage('Login successful! Happy Browsing');
+      const token = response.data.access || response.data.token;
+      if (token) {
+        localStorage.setItem("authToken", token);
+        console.log("Token saved:", token);
+      } else {
+        console.warn("No token found in response:", response.data);
+      }
+
+      navigate("/recipes", { state: { successMessage: "Login successful!" } });
+    } catch (error) {
+      if (error.response?.data?.error) {
+        setErrorMessage(error.response.data.error);
+      } else {
+        setErrorMessage("Failed to login user. Please contact admin");
+      }
+    }
+  }
+
   return (
     <div
       style={{
         backgroundImage: "url('/background.jpg')",
         backgroundSize: "cover",
+        background: "linear-gradient(135deg, #17e239ff, #25c6fcff)",
         backgroundPosition: "center",
         minHeight: "100vh",
         display: "flex",
@@ -19,17 +59,18 @@ const Login = () => {
           width: "100%",
           maxWidth: "400px",
           borderRadius: "20px",
-          backgroundColor: "rgba(255, 255, 255, 0.95)",
+          background: "linear-gradient(135deg, #0d1d24ff, #e0ebe1ff)",
           boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
         }}
       >
-        <h3
-          className="text-center mb-4 fw-bold"
-          style={{ color: "#343a40" }}
-        >
+        {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
+        {successMessage && <div className="alert alert-success text-center">{successMessage}</div>}
+
+        <h3 className="text-center mb-4 fw-bold" style={{ color: "#fff" }}>
           Login
         </h3>
-        <form>
+
+        <form onSubmit={attemptLogin}>
           <div className="mb-3">
             <input
               type="email"
@@ -44,16 +85,11 @@ const Login = () => {
                 border: "1px solid #ccc",
                 transition: "all 0.3s",
               }}
-              onFocus={(e) =>
-                (e.target.style.boxShadow =
-                  "inset 0 2px 5px rgba(0,0,0,0.1), 0 0 5px #6a11cb")
-              }
-              onBlur={(e) =>
-                (e.target.style.boxShadow =
-                  "inset 0 2px 5px rgba(0,0,0,0.05)")
-              }
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
             />
           </div>
+
           <div className="mb-4">
             <input
               type="password"
@@ -68,14 +104,8 @@ const Login = () => {
                 border: "1px solid #ccc",
                 transition: "all 0.3s",
               }}
-              onFocus={(e) =>
-                (e.target.style.boxShadow =
-                  "inset 0 2px 5px rgba(0,0,0,0.1), 0 0 5px #6a11cb")
-              }
-              onBlur={(e) =>
-                (e.target.style.boxShadow =
-                  "inset 0 2px 5px rgba(0,0,0,0.05)")
-              }
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
             />
           </div>
 
@@ -92,20 +122,12 @@ const Login = () => {
               boxShadow: "0 5px 15px rgba(0,0,0,0.2)",
               transition: "all 0.3s",
             }}
-            onMouseOver={(e) => {
-              e.target.style.transform = "scale(1.05)";
-              e.target.style.boxShadow = "0 8px 20px rgba(0,0,0,0.3)";
-            }}
-            onMouseOut={(e) => {
-              e.target.style.transform = "scale(1)";
-              e.target.style.boxShadow = "0 5px 15px rgba(0,0,0,0.2)";
-            }}
           >
             Login
           </button>
         </form>
 
-        <p className="text-center mt-3" style={{ fontSize: "0.9rem" }}>
+        <p className="text-center mt-3" style={{ fontSize: "0.9rem", color: "#fff" }}>
           Don't have an account?{" "}
           <a href="/register" style={{ color: "#2575fc", fontWeight: "500" }}>
             Register

@@ -1,22 +1,42 @@
 import React from "react";
-function Pagination({ currentPage }) {
+
+function Pagination({ currentPage, totalPages, onPageChange }) {
   return (
     <nav className="mt-4">
       <ul className="pagination justify-content-center">
         <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-          <button className="page-link">Previous</button>
+          <button
+            className="page-link"
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </button>
         </li>
-        <li className={`page-item ${currentPage === 1 ? "active" : ""}`}>
-          <button className="page-link">1</button>
-        </li>
-        <li className={`page-item ${currentPage === 2 ? "active" : ""}`}>
-          <button className="page-link">2</button>
-        </li>
-        <li className={`page-item ${currentPage === 3 ? "active" : ""}`}>
-          <button className="page-link">3</button>
-        </li>
-        <li className="page-item">
-          <button className="page-link">Next</button>
+
+        {[...Array(totalPages)].map((_, index) => {
+          const page = index + 1;
+          return (
+            <li
+              key={page}
+              className={`page-item ${currentPage === page ? "active" : ""}`}
+            >
+              <button className="page-link" onClick={() => onPageChange(page)}>
+                {page}
+              </button>
+            </li>
+          );
+        })}
+
+
+        <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+          <button
+            className="page-link"
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
         </li>
       </ul>
     </nav>

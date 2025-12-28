@@ -1,6 +1,40 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
-function MyRecipeView() {
+function ViewRecipeModal({ recipeId }) {
+  const [recipe, setRecipe] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!recipeId) return;
+
+    setLoading(true);
+    setRecipe(null);
+
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      console.error("No auth token found");
+      setLoading(false);
+      return;
+    }
+
+    axios
+      .get(`http://127.0.0.1:8000/api/user_recipes/${recipeId}/`, {
+        headers: {
+          Authorization: `Token ${token}`,
+        },
+      })
+      .then((res) => {
+        setRecipe(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Recipe fetch error:", err.response?.data || err.message);
+        setLoading(false);
+      });
+  }, [recipeId]);
+
   return (
     <div
       className="modal fade"
@@ -56,46 +90,62 @@ function MyRecipeView() {
       <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div className="modal-content border-0 rounded-4 overflow-hidden">
 
-
-          <div className="recipe-hero">
-            <img
-              src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c"
-              alt="Recipe"
-            />
-            <div className="recipe-overlay">
-              <h3 className="fw-bold mb-1">Vegitable Pasta</h3>
+          {loading && (
+            <div className="text-center p-5 fw-semibold">
+              Loading recipe...
             </div>
-          </div>
+          )}
 
-  
-          <div className="modal-body bg-light p-4">
+          {recipe && (
+            <>
+              <div className="recipe-hero">
+                <img
+                    src={
+                      recipe.image
+                        ? recipe.image.startsWith("http")
+                          ? recipe.image
+                          : `http://127.0.0.1:8000${recipe.image}`
+                        : "/no-image.png"
+                    }
+                    alt={recipe.title}
+                 />
+                <div className="recipe-overlay">
+                  <h3 className="fw-bold mb-1">{recipe.title}</h3>
+                  <p className="mb-0 opacity-75">
+                    👨‍🍳 Chef {recipe.shef}
+                  </p>
+                </div>
+              </div>
 
-    
-            <div className="d-flex flex-wrap gap-3 mb-4">
-              <div className="info-chip">⏱ 45 mins</div>
-              <div className="info-chip">🔥 Medium</div>
-              <div className="info-chip">📅 01 Dec 2025</div>
-            </div>
+              <div className="modal-body bg-light p-4">
+                <div className="d-flex flex-wrap gap-3 mb-4">
+                  <div className="info-chip">⏱ {recipe.time} mins</div>
+                  <div className="info-chip">🔥 {recipe.difficulty}</div>
+                  <div className="info-chip">
+                    📅 {new Date(recipe.created_at).toDateString()}
+                  </div>
+                </div>
 
-     
-            <div className="mb-4">
-              <h6 className="detail-title text-success">🧂 Ingredients</h6>
-              <p className="text-muted mb-0">
-                Pasta, Cream, Garlic, Butter, Cheese, Herbs
-              </p>
-            </div>
+                <div className="mb-4">
+                  <h6 className="detail-title text-success">
+                    🧂 Ingredients
+                  </h6>
+                  <p className="text-muted mb-0">
+                    {recipe.ingredients}
+                  </p>
+                </div>
 
-   
-            <div>
-              <h6 className="detail-title text-primary">📋 Cooking Steps</h6>
-              <p className="text-muted mb-0">
-                Boil pasta → Prepare creamy sauce → Mix together →
-                Garnish → Serve hot
-              </p>
-            </div>
-
-          </div>
-
+                <div>
+                  <h6 className="detail-title text-primary">
+                    📋 Cooking Steps
+                  </h6>
+                  <p className="text-muted mb-0">
+                    {recipe.steps}
+                  </p>
+                </div>
+              </div>
+            </>
+          )}
 
           <div className="modal-footer bg-white border-0">
             <button
@@ -112,4 +162,4 @@ function MyRecipeView() {
   );
 }
 
-export default MyRecipeView;
+export default ViewRecipeModal;
