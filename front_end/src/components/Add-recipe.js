@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function AddRecipeModal() {
@@ -10,6 +11,7 @@ function AddRecipeModal() {
   const [image, setImage] = useState(null);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -51,6 +53,8 @@ function AddRecipeModal() {
       setTime("");
       setDifficulty("");
       setImage(null);
+      window.$("#addRecipeModal").modal("hide");
+      navigate("/my-recipes/");
 
     } catch (error) {
       console.error(error);
@@ -243,7 +247,7 @@ function AddRecipeModal() {
               className="btn btn-primary rounded-pill px-4 fw-bold shadow-sm"
               disabled={loading}
             >
-              {loading ? "Publishing..." : "🚀 Publish Recipe"}
+              {loading ? "Publishing..." : " Recipe Published "}
             </button>
           </div>
         </form>

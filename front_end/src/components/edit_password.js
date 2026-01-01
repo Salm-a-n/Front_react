@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect,} from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function EditPasswordModal() {
@@ -8,6 +9,7 @@ function EditPasswordModal() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (message || error) {
@@ -66,6 +68,9 @@ function EditPasswordModal() {
       setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
+      window.$("#editPasswordModal").modal("hide");
+
+      navigate("/login"); 
     } catch (err) {
       setError(err.response?.data?.message || "Failed to update password");
     } finally {

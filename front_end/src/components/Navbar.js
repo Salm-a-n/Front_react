@@ -1,13 +1,30 @@
-
-
 import { NavLink, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 function Navbar() {
   const navigate = useNavigate();
-  // const isLoggedIn = !!localStorage.getItem("authToken");
-  const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    navigate("/login", { replace: true }); 
+
+  const handleLogout = async () => {
+    const token = localStorage.getItem("authToken");
+
+    try {
+      if (token) {
+        await axios.post(
+          "http://127.0.0.1:8000/api/userlogout/",
+          {},
+          {
+            headers: {
+              Authorization: `Token ${token}`,
+            },
+          }
+        );
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      localStorage.removeItem("authToken");
+      navigate("/login", { replace: true });
+    }
   };
 
   return (
@@ -17,31 +34,25 @@ function Navbar() {
           🍲 Recipe Sharing
         </NavLink>
         <div className="nav-links">
-          {/* {!isLoggedIn && ( */}
-            <NavLink to="/login" className="nav-btn">
-              Login
+          <NavLink to="/login" className="nav-btn">
+            Login
+          </NavLink>
+
+          <>
+            <NavLink to="/profile" className="nav-btn">
+              Profile
             </NavLink>
-          {/*  )} */}
 
-          {/* {isLoggedIn && ( */}
-            <>
-              <NavLink to="/profile" className="nav-btn">
-                Profile
-              </NavLink>
-
-              <button
-                onClick={handleLogout}
-                className="nav-btn logout"
-                type="button"
-              >
-                Logout
-              </button>
-            </>
-          {/* )} */}
+            <button
+              onClick={handleLogout}
+              className="nav-btn logout"
+              type="button"
+            >
+              Logout
+            </button>
+          </>
         </div>
       </nav>
-
-      {/* Styles */}
       <style>
         {`
         .custom-navbar {
@@ -126,3 +137,4 @@ function Navbar() {
 }
 
 export default Navbar;
+

@@ -15,13 +15,12 @@ function RecipeList() {
 
   const [showToast, setShowToast] = useState(false);
   const [recipes, setRecipes] = useState([]);
-  const [allRecipes, setAllRecipes] = useState([]); // full dataset
+  const [allRecipes, setAllRecipes] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searching, setSearching] = useState(false);
   const [selectedRecipeId, setSelectedRecipeId] = useState(null);
 
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const recipesPerPage = 3;
 
@@ -34,7 +33,7 @@ function RecipeList() {
     }
   }, [successMessage]);
 
-  // Load all recipes
+
   useEffect(() => {
     axios
       .get("http://127.0.0.1:8000/api/full_recipes/")
@@ -50,9 +49,9 @@ function RecipeList() {
       });
   }, []);
 
-  // Search handler
+
   const handleSearch = (query) => {
-    setCurrentPage(1); // reset page
+    setCurrentPage(1); 
 
     if (!query.trim()) {
       setRecipes(allRecipes);
@@ -76,7 +75,7 @@ function RecipeList() {
       });
   };
 
-  // Pagination logic
+
   const indexOfLastRecipe = currentPage * recipesPerPage;
   const indexOfFirstRecipe = indexOfLastRecipe - recipesPerPage;
   const currentRecipes = recipes.slice(indexOfFirstRecipe, indexOfLastRecipe);
@@ -220,7 +219,7 @@ function RecipeList() {
           ))}
         </div>
 
-        {/* Pagination */}
+
         <div className="mt-5 d-flex justify-content-center">
           <Pagination
             currentPage={currentPage}

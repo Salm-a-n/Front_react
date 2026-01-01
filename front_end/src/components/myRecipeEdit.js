@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function EditRecipeModal({ recipeId, onClose, onUpdate }) {
@@ -14,6 +15,7 @@ function EditRecipeModal({ recipeId, onClose, onUpdate }) {
   const [previewImage, setPreviewImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const token = localStorage.getItem("authToken");
+  const navigate = useNavigate();
 
 
   useEffect(() => {
@@ -73,6 +75,9 @@ function EditRecipeModal({ recipeId, onClose, onUpdate }) {
         alert("Recipe updated successfully!");
         if (onUpdate) onUpdate();
         if (onClose) onClose();
+        window.$("#editRecipeModal").modal("hide");
+        navigate("/my-recipes/");
+
       })
       .catch((err) => {
         console.error(err);
@@ -91,8 +96,6 @@ function EditRecipeModal({ recipeId, onClose, onUpdate }) {
     >
       <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div className="modal-content border-0 rounded-4 shadow-lg">
-
-          {/* Modal Header */}
           <div className="modal-header modal-header-premium rounded-top-4 d-flex justify-content-between align-items-center">
             <div>
               <h4 className="fw-bold mb-0">🍽 Edit Recipe</h4>
@@ -109,14 +112,11 @@ function EditRecipeModal({ recipeId, onClose, onUpdate }) {
               &times;
             </button>
           </div>
-
-          {/* Modal Body */}
           <div className="modal-body bg-light p-4">
             {loading ? (
               <div className="text-center py-5">Loading...</div>
             ) : (
               <>
-                {/* Basic Info */}
                 <div className="section-card mb-4">
                   <h6 className="fw-bold mb-3 text-primary">📌 Basic Information</h6>
 
@@ -150,7 +150,7 @@ function EditRecipeModal({ recipeId, onClose, onUpdate }) {
                         value={recipeData.difficulty}
                         onChange={handleChange}
                       >
-                        <option>🔥 Difficulty Level</option>
+                        <option> Difficulty Level</option>
                         <option>Easy</option>
                         <option>Medium</option>
                         <option>Hard</option>
@@ -158,8 +158,6 @@ function EditRecipeModal({ recipeId, onClose, onUpdate }) {
                     </div>
                   </div>
                 </div>
-
-                {/* Recipe Details */}
                 <div className="section-card mb-4">
                   <h6 className="fw-bold mb-3 text-success">📖 Recipe Details</h6>
 
@@ -209,8 +207,6 @@ function EditRecipeModal({ recipeId, onClose, onUpdate }) {
               </>
             )}
           </div>
-
-          {/* Footer */}
           <div className="modal-footer modal-footer-premium px-4 py-3">
             <button
               type="button"

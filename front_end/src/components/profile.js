@@ -67,7 +67,6 @@ function Profile() {
             backdropFilter: "blur(10px)",
           }}
         >
-          {/* Header */}
           <div
             className="text-center p-4"
             style={{
@@ -89,10 +88,7 @@ function Profile() {
             <h4 className="mb-0">{profile.name}</h4>
             <small style={{ opacity: 0.85 }}>Recipe Creator</small>
           </div>
-
-          {/* Body */}
           <div className="p-4 bg-white">
-            {/* Username */}
             <div className="mb-3">
               <label className="form-label fw-semibold text-muted">
                 Username
@@ -107,8 +103,6 @@ function Profile() {
                 {profile.name}
               </div>
             </div>
-
-            {/* Email */}
             <div className="mb-3">
               <label className="form-label fw-semibold text-muted">
                 Email Address
@@ -123,8 +117,6 @@ function Profile() {
                 {profile.email}
               </div>
             </div>
-
-            {/* Password */}
             <div className="mb-4">
               <label className="form-label fw-semibold text-muted">
                 Password
@@ -146,8 +138,6 @@ function Profile() {
                 </button>
               </div>
             </div>
-
-            {/* Actions */}
             <div className="d-grid gap-2">
               <Link to="/recipes" className="btn btn-dark fw-semibold">
                 ← Back to Recipes
